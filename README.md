@@ -1,38 +1,54 @@
-# Aviation News UK — Airline Schedule Tracker
+# Aviation News UK — Schedule Monitor (v2)
 
-A public schedule-change dashboard starter project.
+A free-first MVP foundation for collecting permitted airline schedule snapshots, comparing them, and publishing verified changes.
 
-## Current state
-- Responsive public dashboard UI.
-- Search and filters for airline, airport, destination, change type and season.
-- Empty-state behaviour until verified records are supplied.
-- Supabase schema for schedule snapshots and detected changes.
-- Hourly GitHub Actions workflow scaffold.
+## Important scope
+This does **not** claim universal or unpublished schedule coverage. A booking page showing no seats is not proof of a cancellation. Only sources whose access and reuse are permitted should be connected. Public changes should carry a source URL and verification status.
 
-**This repository starter does not yet contain a live airline data feed.** It must not publish illustrative or unverified schedule changes as facts.
+## What is included
+- `index.html`: public dashboard for GitHub Pages.
+- `supabase/migrations/001_initial_schema.sql`: database tables and read policy.
+- `scripts/compare_schedules.py`: compares two normalized schedule snapshots.
+- `scripts/ingest_snapshot.py`: validates a snapshot and writes it to Supabase.
+- `data/airline_sources.csv`: starter source register; no source is assumed to be an approved automated feed.
+- `.github/workflows/schedule-check.yml`: scheduled workflow scaffold. It does not scrape airline sites or invent data.
+- `examples/`: normalized example snapshots.
 
-## Intended architecture
-- GitHub: source control and CI.
-- GitHub Pages (or another static host): public dashboard.
-- Supabase: persistent schedule snapshots and change records.
-- Scheduled collector: retrieves permitted official airline timetable data or licensed schedule data, normalises it, compares equivalent travel periods and writes verified changes.
-- Public API: serves published changes to the dashboard.
-
-## Important data requirements
-A reliable frequency comparison needs comparable date windows, operating-day patterns, codeshare handling, seasonal boundaries and duplicate-flight rules. Airline websites may restrict automated access; use official feeds, published timetable files or licensed data where available and respect each provider's terms. Do not treat a booking search result or a single unavailable date as proof that a route was withdrawn.
-
-## GitHub setup
-1. Create a private repository initially, e.g. `aviation-news-uk-schedule-tracker`.
-2. Upload this project.
-3. Enable GitHub Pages after confirming the dashboard path and hosting arrangement.
-4. Create a Supabase project and apply `supabase/migrations/001_initial_schema.sql`.
-5. Add required secrets only after the collector is implemented and tested:
+## First setup (no paid subscription required)
+1. Create a Supabase account and a **Free** project: https://supabase.com/dashboard
+2. In Supabase → SQL Editor, run `supabase/migrations/001_initial_schema.sql`.
+3. In Supabase → Project Settings → API, copy the Project URL and anon/public key.
+4. In GitHub repo → Settings → Secrets and variables → Actions, add:
    - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-6. Configure a permitted schedule-data source and implement its adapter before enabling hourly collection.
+   - `SUPABASE_SERVICE_ROLE_KEY` (secret; never put this in the website or commit it)
+5. In `index.html`, replace the empty `cfg.url` and `cfg.anonKey` values with the Project URL and anon/public key. The anon key is intended for browser use; database policy limits public access to verified changes.
+6. Upload the contents of this project into the existing GitHub repository, preserving the folders. GitHub Pages should continue serving `/`.
 
-## Local preview
-Open `index.html` directly in a browser. Without `/api/changes`, it safely shows an empty state.
+## First working test
+Use the two example snapshots in `examples/` with the comparison script. They are synthetic test data, not real airline schedules:
+```bash
+python scripts/compare_schedules.py examples/snapshot_before.json examples/snapshot_after.json
+```
+This should identify the illustrative weekly frequency reduction. Do not publish this test result.
 
-## Planned change record fields
-Airline, origin, destination, season, previous/current frequency, operating days, departure/arrival times, aircraft (where sourced), effective dates, detected timestamp, source URL, verification status and snapshot references.
+## Data contract
+Each schedule record represents one operating pattern:
+```json
+{
+  "airline": "Example Air",
+  "flight_number": "EA123",
+  "origin_airport": "GLA",
+  "destination_airport": "LHR",
+  "operating_days": ["MON", "WED", "FRI"],
+  "departure_local": "08:30",
+  "arrival_local": "10:00",
+  "effective_from": "2027-04-01",
+  "effective_to": "2027-10-31",
+  "source_url": "https://example.com/timetable",
+  "source_type": "official_timetable"
+}
+```
+Only ingest records from an approved source. Keep snapshots for equivalent future date windows to avoid false comparisons.
+
+## Next milestone
+Connect one source with documented API access and permitted use. Lufthansa Group's developer portal is a candidate to investigate, but API access, authentication, coverage and reuse terms must be confirmed before enabling a collector. Do not assume this project already has API credentials.
