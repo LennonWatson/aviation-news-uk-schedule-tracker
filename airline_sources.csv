@@ -1,0 +1,7 @@
+airline,coverage,source_url,source_type,automated_access_status,notes
+Lufthansa Group carriers,Selected group airlines,https://developer.lufthansa.com/,API,investigate,Confirm API product access authentication coverage and reuse terms before integration
+British Airways,UK network,https://www.britishairways.com/,Official website,manual_review,No automated collection enabled
+easyJet,UK network,https://www.easyjet.com/,Official website,manual_review,No automated collection enabled
+Jet2.com,UK network,https://www.jet2.com/,Official website,manual_review,No automated collection enabled
+Ryanair,UK network,https://www.ryanair.com/,Official website,manual_review,No automated collection enabled
+TUI Airways,UK network,https://www.tui.co.uk/,Official website,manual_review,No automated collection enabled

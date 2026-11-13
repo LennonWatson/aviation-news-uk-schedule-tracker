@@ -1,0 +1,19 @@
+name: Schedule monitor
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *"
+permissions:
+  contents: read
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate comparison tool
+        run: python scripts/compare_schedules.py examples/snapshot_before.json examples/snapshot_after.json
+      - name: Explain current source status
+        run: echo "No airline collector is enabled until an approved source and credentials are configured."
