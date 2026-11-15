@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UK Airline Schedule Monitor | Aviation News UK</title>
+<meta name="description" content="Track verified airline route and schedule changes across UK airports with Aviation News UK.">
+<style>
+:root{--navy:#10243a;--blue:#1769aa;--ink:#172433;--muted:#647487;--line:#dce4ec;--bg:#f3f6f9;--green:#147d53;--amber:#9a6500}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.5 Arial,sans-serif;color:var(--ink)}
+header{background:var(--navy);color:white;padding:28px max(20px,calc((100% - 1120px)/2))}
+header small{letter-spacing:.12em;text-transform:uppercase;color:#b9d4ea;font-weight:bold}
+h1{font-size:clamp(27px,4vw,40px);margin:8px 0}header p{margin:0;color:#d4e0eb;max-width:720px}
+main{max-width:1120px;margin:26px auto;padding:0 18px}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+input,select{padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:white;font:inherit}
+input{flex:1;min-width:220px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat,.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:17px}.stat strong{display:block;font-size:25px;color:var(--navy)}.stat span{color:var(--muted);font-size:13px}
+.panel h2{margin:0 0 12px;font-size:19px}.notice{background:#fff8e8;border:1px solid #f0dfb8;color:#73500a;padding:13px 15px;border-radius:9px;margin-bottom:16px}
+.item{padding:16px 0;border-top:1px solid var(--line)}.item:first-child{border-top:0}.topline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.airline{font-weight:bold;font-size:17px}.tag{font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:.04em;border-radius:20px;padding:4px 8px;background:#eaf1f8;color:#31536f}.tag.verified{background:#e6f5ed;color:var(--green)}.tag.review{background:#fff3d9;color:var(--amber)}
+.route{font-weight:bold;margin:7px 0 3px}.detail{color:var(--muted);font-size:14px}.source{font-size:13px;margin-top:7px}.source a{color:var(--blue)}
+.empty{color:var(--muted);padding:24px 0}.footer{color:var(--muted);font-size:12px;text-align:center;padding:28px}
+@media(max-width:650px){.stats{grid-template-columns:1fr}.stat{padding:13px}}
+</style></head>
+<body>
+<header><small>Aviation News UK · Operations & Data</small><h1>UK Airline Schedule Monitor</h1><p>Tracking published route and timetable changes across airlines serving the United Kingdom.</p></header>
+<main>
+<div class="notice"><strong>Coverage note:</strong> Only changes supported by a published source are shown as verified. This is not a live flight tracker and cannot guarantee detection of every unpublished schedule adjustment.</div>
+<div class="toolbar"><input id="search" placeholder="Search airline, airport or route…" aria-label="Search changes"><select id="type"><option value="">All change types</option><option>New route</option><option>Route withdrawn</option><option>Frequency increase</option><option>Frequency reduction</option><option>Timetable change</option></select></div>
+<div class="stats"><div class="stat"><strong id="total">—</strong><span>Published changes</span></div><div class="stat"><strong id="airlines">—</strong><span>Airlines represented</span></div><div class="stat"><strong id="updated">—</strong><span>Last data refresh</span></div></div>
+<section class="panel"><h2>Latest schedule changes</h2><div id="feed" class="empty">Connecting to the schedule database…</div></section>
+<div class="footer">Aviation News UK · Schedule information should always be checked with the operating airline before travel.</div>
+</main>
+<script>
+const cfg={url:"",anonKey:""};
+const feed=document.getElementById('feed'),search=document.getElementById('search'),type=document.getElementById('type');
+let rows=[];
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function render(){
+ const q=search.value.toLowerCase(),t=type.value;
+ const shown=rows.filter(r=>(!t||r.change_type===t)&&[r.airline,r.origin_airport,r.destination_airport,r.summary].join(' ').toLowerCase().includes(q));
+ document.getElementById('total').textContent=rows.length;
+ document.getElementById('airlines').textContent=new Set(rows.map(r=>r.airline)).size;
+ document.getElementById('updated').textContent=rows.length?new Date(Math.max(...rows.map(r=>new Date(r.detected_at||r.created_at||0).getTime()))).toLocaleString('en-GB'):'—';
+ feed.innerHTML=shown.length?shown.map(r=>`<article class="item"><div class="topline"><span class="airline">${esc(r.airline)}</span><span class="tag ${r.verification_status==='verified'?'verified':'review'}">${esc(r.verification_status||'under review')}</span><span class="tag">${esc(r.change_type)}</span></div><div class="route">${esc(r.origin_airport||'')} → ${esc(r.destination_airport||'')}</div><div>${esc(r.summary||'Schedule update recorded')}</div><div class="detail">Detected ${r.detected_at?new Date(r.detected_at).toLocaleDateString('en-GB'):'date not supplied'}${r.effective_from?' · Effective '+esc(r.effective_from):''}</div>${r.source_url?`<div class="source"><a href="${esc(r.source_url)}" target="_blank" rel="noopener">View source</a></div>`:''}</article>`).join(''):'<div class="empty">No published schedule changes match this search.</div>';
+}
+async function load(){
+ if(!cfg.url||!cfg.anonKey){feed.textContent='The public schedule feed is not connected yet. The dashboard is ready; the database connection will be added during setup.';return;}
+ try{const res=await fetch(cfg.url+'/rest/v1/schedule_changes?select=*&verification_status=eq.verified&order=detected_at.desc&limit=100',{headers:{apikey:cfg.anonKey,Authorization:'Bearer '+cfg.anonKey}});if(!res.ok)throw Error('Database returned '+res.status);rows=await res.json();render();}
+ catch(e){feed.textContent='The schedule feed is temporarily unavailable. Please try again later.';console.error(e);}
+}
+search.addEventListener('input',render);type.addEventListener('change',render);load();
+</script></body></html>
