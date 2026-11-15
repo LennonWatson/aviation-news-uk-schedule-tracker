@@ -1,0 +1,23 @@
+[
+  {
+    "airline": "DEMO",
+    "flight_number": "AN100",
+    "origin": "GLA",
+    "destination": "LHR",
+    "departure_local": "08:00",
+    "arrival_local": "09:25",
+    "operating_days": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "effective_from": "2027-03-28",
+    "effective_to": "2027-10-30",
+    "aircraft_type": "A320",
+    "source_name": "Synthetic test data",
+    "source_url": "",
+    "captured_at": "2026-11-01T00:00:00Z"
+  }
+]

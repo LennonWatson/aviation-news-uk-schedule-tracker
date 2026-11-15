@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flight Intelligence | Aviation News UK</title>
+<style>
+:root{--navy:#10243a;--blue:#1769aa;--ink:#172433;--muted:#647487;--line:#dce4ec;--bg:#f3f6f9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.5 Arial,sans-serif;color:var(--ink)}
+header{background:var(--navy);color:white;padding:28px max(20px,calc((100% - 1120px)/2))}header small{color:#b9d4ea;text-transform:uppercase;letter-spacing:.12em;font-weight:bold}
+h1{font-size:clamp(28px,4vw,40px);margin:8px 0}header p{margin:0;color:#d4e0eb;max-width:760px}
+main{max-width:1120px;margin:26px auto;padding:0 18px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+input{padding:12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:white;flex:1;min-width:220px}
+.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:18px}.note{background:#fff8e8;border:1px solid #f0dfb8;padding:12px;border-radius:8px;margin-bottom:16px}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:12px;text-transform:uppercase}
+.muted{color:var(--muted)}@media(max-width:700px){.tablewrap{overflow:auto}table{min-width:760px}}
+</style></head><body>
+<header><small>Aviation News UK · Flight Intelligence</small><h1>Flight Schedule Search</h1><p>Search published schedule records and compare changes over time. Coverage depends on connected, authorised data sources.</p></header>
+<main><div class="note"><b>Data status:</b> This dashboard does not yet have a live airline data provider connected. It will only display records supplied through approved sources. Missing records are not proof of cancellation.</div>
+<div class="toolbar"><input id="q" placeholder="Search airline, flight number, airport or route…" aria-label="Search flights"></div>
+<section class="panel"><div class="tablewrap"><table><thead><tr><th>Airline</th><th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th><th>Days</th><th>Aircraft</th><th>Season</th></tr></thead><tbody id="rows"><tr><td colspan="8" class="muted">Loading schedule records…</td></tr></tbody></table></div><p id="status" class="muted"></p></section></main>
+<script>
+const days={1:"Mon",2:"Tue",3:"Wed",4:"Thu",5:"Fri",6:"Sat",7:"Sun"};let flights=[];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function render(){const q=document.querySelector("#q").value.toLowerCase();const list=flights.filter(f=>[f.airline,f.flight_number,f.origin,f.destination,f.aircraft_type].join(" ").toLowerCase().includes(q));
+document.querySelector("#rows").innerHTML=list.length?list.map(f=>`<tr><td>${esc(f.airline)}</td><td>${esc(f.flight_number)}</td><td>${esc(f.origin)} → ${esc(f.destination)}</td><td>${esc(f.departure_local)}</td><td>${esc(f.arrival_local)}</td><td>${(f.operating_days||[]).map(d=>days[d]||d).join(" ")}</td><td>${esc(f.aircraft_type||"—")}</td><td>${esc(f.effective_from||"")} – ${esc(f.effective_to||"")}</td></tr>`).join(""):'<tr><td colspan="8" class="muted">No matching flights.</td></tr>';
+document.querySelector("#status").textContent=`${list.length} matching records · ${flights.length} total records`;}
+fetch("./data/flights.json").then(r=>{if(!r.ok)throw Error("No published schedule file");return r.json()}).then(d=>{flights=d;render()}).catch(()=>{document.querySelector("#rows").innerHTML='<tr><td colspan="8" class="muted">No schedule dataset is connected yet. Add an approved source before publishing real flight records.</td></tr>';document.querySelector("#status").textContent="Awaiting authorised schedule data.";});
+document.querySelector("#q").addEventListener("input",render);
+</script></body></html>

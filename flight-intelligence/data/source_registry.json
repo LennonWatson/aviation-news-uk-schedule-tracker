@@ -1,0 +1,29 @@
+[
+  {
+    "provider": "Lufthansa Group Developer Center",
+    "coverage": "Selected Lufthansa Group airlines",
+    "data": "Passenger flight schedules; route, flight number, dates, operating days, aircraft type",
+    "access": "Developer account/API access required; schedule listing is restricted",
+    "automation_status": "disabled_until_access_approved",
+    "documentation": "https://developer.lufthansa.com/docs/read/api_details/flight_schedules",
+    "notes": "Use documented API only. Do not scrape Lufthansa websites; API terms prohibit screen scraping."
+  },
+  {
+    "provider": "TUI Developer Portal",
+    "coverage": "TUI-operated airlines",
+    "data": "Operational flight schedule data",
+    "access": "OAuth client credentials after access approval",
+    "automation_status": "disabled_until_access_approved",
+    "documentation": "https://developer.tui/api-catalog/aviation-flight-schedule-api/api-description",
+    "notes": "API FAQ says access is requested through TUI Air Links; operational date range is limited."
+  },
+  {
+    "provider": "British Airways",
+    "coverage": "British Airways",
+    "data": "Potential NDC / partner schedule and shopping data",
+    "access": "No confirmed self-serve public schedule API for this project; partner approval may be required",
+    "automation_status": "disabled",
+    "documentation": "https://developer.ba.com/",
+    "notes": "Do not scrape ba.com booking pages. Seek written permission / current approved API route."
+  }
+]
