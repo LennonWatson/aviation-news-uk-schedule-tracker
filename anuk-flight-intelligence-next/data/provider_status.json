@@ -1,0 +1,29 @@
+{
+  "checked_on": "2026-11-15",
+  "providers": [
+    {
+      "name": "Navo24 Flight Schedules",
+      "type": "official airport/airline schedule aggregation",
+      "free_access": "One no-account demo search; free account allowance documented as 3 searches/day and 10/month",
+      "uk_coverage": "Not confirmed until coverage endpoint is checked; route search requires API key except HKG-FRA demo",
+      "status": "candidate_only",
+      "documentation": "https://flight.navo24.com/docs"
+    },
+    {
+      "name": "OpenSky Network",
+      "type": "ADS-B movement data",
+      "free_access": "Limited research API access",
+      "uk_coverage": "Aircraft movement data, not forward commercial schedules",
+      "status": "not_used_for_schedules",
+      "documentation": "https://opensky-network.org/about/terms-of-use"
+    },
+    {
+      "name": "OpenFlights",
+      "type": "airport/airline/route reference",
+      "free_access": "Open database licence with attribution/share-alike obligations",
+      "uk_coverage": "Reference routes only; no current timetable feed",
+      "status": "reference_only",
+      "documentation": "https://openflights.org/data"
+    }
+  ]
+}
